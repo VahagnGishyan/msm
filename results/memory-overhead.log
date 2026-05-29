@@ -1,0 +1,21 @@
+Note: Google Test filter = MsmMemoryOverhead.*
+[==========] Running 4 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 4 tests from MsmMemoryOverhead
+[ RUN      ] MsmMemoryOverhead.AppendOnlyGrow_Under_5MB
+[MemOverhead.AppendOnlyGrow] live=800000 B, RSS-delta=2658304 B, overhead=3.32x
+[       OK ] MsmMemoryOverhead.AppendOnlyGrow_Under_5MB (10 ms)
+[ RUN      ] MsmMemoryOverhead.StringGrowAlwaysCoW_Under_5MB
+[MemOverhead.StringGrowAlwaysCoW] N=1000, live=1008 B, theoretical-total=508500 B, RSS-delta=602112 B
+[       OK ] MsmMemoryOverhead.StringGrowAlwaysCoW_Under_5MB (0 ms)
+[ RUN      ] MsmMemoryOverhead.ObjectAddRemove_Under_50MB
+[MemOverhead.ObjectAddRemove] adds=1000, removes=500, RSS-delta=8921088 B (8.51 MB)
+[       OK ] MsmMemoryOverhead.ObjectAddRemove_Under_50MB (12 ms)
+[ RUN      ] MsmMemoryOverhead.FreeReleasesAllMemory
+[MemOverhead.FreeReleasesAllMemory] baseline=16228352 B, after-5-cycles=17580032 B, delta=+1351680 B
+[       OK ] MsmMemoryOverhead.FreeReleasesAllMemory (3 ms)
+[----------] 4 tests from MsmMemoryOverhead (28 ms total)
+
+[----------] Global test environment tear-down
+[==========] 4 tests from 1 test suite ran. (30 ms total)
+[  PASSED  ] 4 tests.

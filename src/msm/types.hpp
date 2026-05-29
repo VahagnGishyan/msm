@@ -1,0 +1,127 @@
+#pragma once
+
+#include <cstdint>
+#include <cstring>
+
+namespace msm
+{
+    //////////////////////////////////////////////////////////////////////
+    /// MSM type wrappers — thin views over raw shared memory bytes.
+    /// Each type knows its slot_size and provides operator= / operator T().
+    ///
+    /// Slot layout for primitives (8B):
+    ///   [is_const:1B | type:1B | reserved:2B | payload:4B]
+    ///   Value stored in payload (bytes 4..7)
+    ///
+    /// Slot layout for scalars (16B):
+    ///   [header:8B | value:8B]
+    ///   Value stored in bytes 8..15
+    //////////////////////////////////////////////////////////////////////
+
+    struct boolean
+    {
+        using native_type = bool;
+        static constexpr std::size_t slot_size = 8;
+        std::int8_t* ptr_;
+
+        static void deallocate(std::int8_t*) {} // no nested allocations
+
+        void operator=(bool v)
+        {
+            std::int32_t val = v ? 1 : 0;
+            std::memcpy(ptr_ + 4, &val, 4);
+        }
+
+        operator bool() const
+        {
+            std::int32_t val;
+            std::memcpy(&val, ptr_ + 4, 4);
+            return val != 0;
+        }
+    };
+
+    struct int32
+    {
+        using native_type = std::int32_t;
+        static constexpr std::size_t slot_size = 8;
+        std::int8_t* ptr_;
+
+        static void deallocate(std::int8_t*) {}
+
+        void operator=(std::int32_t v)
+        {
+            std::memcpy(ptr_ + 4, &v, 4);
+        }
+
+        operator std::int32_t() const
+        {
+            std::int32_t val;
+            std::memcpy(&val, ptr_ + 4, 4);
+            return val;
+        }
+    };
+
+    struct float32
+    {
+        using native_type = float;
+        static constexpr std::size_t slot_size = 8;
+        std::int8_t* ptr_;
+
+        static void deallocate(std::int8_t*) {}
+
+        void operator=(float v)
+        {
+            std::memcpy(ptr_ + 4, &v, 4);
+        }
+
+        operator float() const
+        {
+            float val;
+            std::memcpy(&val, ptr_ + 4, 4);
+            return val;
+        }
+    };
+
+    struct int64
+    {
+        using native_type = std::int64_t;
+        static constexpr std::size_t slot_size = 16;
+        std::int8_t* ptr_;
+
+        static void deallocate(std::int8_t*) {}
+
+        void operator=(std::int64_t v)
+        {
+            std::memcpy(ptr_ + 8, &v, 8);
+        }
+
+        operator std::int64_t() const
+        {
+            std::int64_t val;
+            std::memcpy(&val, ptr_ + 8, 8);
+            return val;
+        }
+    };
+
+    struct float64
+    {
+        using native_type = double;
+        static constexpr std::size_t slot_size = 16;
+        std::int8_t* ptr_;
+
+        static void deallocate(std::int8_t*) {}
+
+        void operator=(double v)
+        {
+            std::memcpy(ptr_ + 8, &v, 8);
+        }
+
+        operator double() const
+        {
+            double val;
+            std::memcpy(&val, ptr_ + 8, 8);
+            return val;
+        }
+    };
+
+} // namespace msm

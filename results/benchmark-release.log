@@ -1,0 +1,50 @@
+# msm-concurrency-bench
+# All times in nanoseconds unless noted.
+#
+# Section 1: Latency CDF (single-threaded, time per op, nanoseconds)
+operation,iterations,min,p50,p90,p95,p99,p99.9,max
+array_push_back_int32,100000,10,20,20,20,21,1032,219906
+array_read_int32,100000,10,20,20,21,30,31,11923
+string_set_const_len,100000,20,21,30,31,981,2034,50578
+string_get,100000,10,20,20,20,21,21,431
+object_set_int32_existing,100000,20,20,21,30,30,31,32713
+object_get_int32,100000,20,20,21,30,30,40,49265
+object_add_new_field,10000,30,150,240,250,260,1423,20359
+object_remove_cow,2000,20,211,1303,1974,5571,20904,38745
+
+# Section 2: Scalability — 1 writer + N readers, aggregate reads/sec
+readers,duration_s,total_reads,reads_per_sec,reads_per_reader_per_sec
+1,2.00,308351233,154159265,154159265
+2,2.00,445037720,222488064,111244032
+4,2.00,779346827,389627603,97406901
+8,2.00,1179944879,589758979,73719872
+16,2.00,1571607268,785208577,49075536
+
+# Section 3: MSM vs std::mutex vs std::shared_mutex vs pthread_rwlock vs std::atomic<int32_t>
+# 1 writer + N readers, aggregate reads/sec for shared int32 update/read.
+primitive,readers,reads_per_sec
+msm_object,1,161940304
+std_atomic,1,567961319
+std_mutex,1,25573240
+std_shared_mutex,1,434865
+pthread_rwlock,1,510933
+msm_object,2,234038229
+std_atomic,2,1028108706
+std_mutex,2,44866551
+std_shared_mutex,2,46381278
+pthread_rwlock,2,40266036
+msm_object,4,406991731
+std_atomic,4,2156951418
+std_mutex,4,41068926
+std_shared_mutex,4,46050074
+pthread_rwlock,4,41699843
+msm_object,8,613820929
+std_atomic,8,3723886900
+std_mutex,8,39229636
+std_shared_mutex,8,35721232
+pthread_rwlock,8,36526700
+msm_object,16,914867916
+std_atomic,16,8246773634
+std_mutex,16,51042694
+std_shared_mutex,16,27299142
+pthread_rwlock,16,28349855

@@ -1,0 +1,28 @@
+Note: Google Test filter = MsmSchemaHash*
+[==========] Running 8 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 1 test from MsmSchemaHashDeathTest
+[ RUN      ] MsmSchemaHashDeathTest.MismatchAborts
+[       OK ] MsmSchemaHashDeathTest.MismatchAborts (17 ms)
+[----------] 1 test from MsmSchemaHashDeathTest (17 ms total)
+
+[----------] 7 tests from MsmSchemaHash
+[ RUN      ] MsmSchemaHash.Fnv1aIsDeterministic
+[       OK ] MsmSchemaHash.Fnv1aIsDeterministic (0 ms)
+[ RUN      ] MsmSchemaHash.Fnv1aIsSensitiveToContent
+[       OK ] MsmSchemaHash.Fnv1aIsSensitiveToContent (0 ms)
+[ RUN      ] MsmSchemaHash.Fnv1aEmptyAndNull
+[       OK ] MsmSchemaHash.Fnv1aEmptyAndNull (0 ms)
+[ RUN      ] MsmSchemaHash.AllocWithSchemaAndGetMatching
+[       OK ] MsmSchemaHash.AllocWithSchemaAndGetMatching (0 ms)
+[ RUN      ] MsmSchemaHash.GetSchemaHashUnknownReturnsZero
+[       OK ] MsmSchemaHash.GetSchemaHashUnknownReturnsZero (0 ms)
+[ RUN      ] MsmSchemaHash.LegacyAllocHasZeroSchema
+[       OK ] MsmSchemaHash.LegacyAllocHasZeroSchema (0 ms)
+[ RUN      ] MsmSchemaHash.GetWithSchemaNotFoundReturnsNull
+[       OK ] MsmSchemaHash.GetWithSchemaNotFoundReturnsNull (0 ms)
+[----------] 7 tests from MsmSchemaHash (2 ms total)
+
+[----------] Global test environment tear-down
+[==========] 8 tests from 2 test suites ran. (22 ms total)
+[  PASSED  ] 8 tests.

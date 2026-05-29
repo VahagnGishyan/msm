@@ -1,0 +1,12 @@
+# msm-crossproc-demo: validates G7 (cross-process safety)
+# Protocol: Variant B single-commit-point on data_ptr_offset.
+# Memory: mmap(MAP_SHARED|MAP_ANONYMOUS) — shared between forked processes.
+#
+writer_pid=78122, reader_pid=78123, parent_pid=78121
+duration_s=0.00
+buf_count_writer=10000
+bytes_written=5005000
+reader_iterations=2000160
+arena_used=5130008 of 67108864 (7.6%)
+violations=0
+PASS: 0 violations — Variant B protocol holds cross-process

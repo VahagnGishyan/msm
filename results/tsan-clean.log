@@ -1,0 +1,213 @@
+[==========] Running 79 tests from 11 test suites.
+[----------] Global test environment set-up.
+[----------] 1 test from MsmSchemaHashDeathTest
+[ RUN      ] MsmSchemaHashDeathTest.MismatchAborts
+[       OK ] MsmSchemaHashDeathTest.MismatchAborts (246 ms)
+[----------] 1 test from MsmSchemaHashDeathTest (247 ms total)
+
+[----------] 14 tests from MsmAllocator
+[ RUN      ] MsmAllocator.AllocReturnsNonNull
+[       OK ] MsmAllocator.AllocReturnsNonNull (0 ms)
+[ RUN      ] MsmAllocator.AllocZeroInitializes
+[       OK ] MsmAllocator.AllocZeroInitializes (0 ms)
+[ RUN      ] MsmAllocator.GetReturnsAllocatedPointer
+[       OK ] MsmAllocator.GetReturnsAllocatedPointer (0 ms)
+[ RUN      ] MsmAllocator.GetReturnsNullForUnknown
+[       OK ] MsmAllocator.GetReturnsNullForUnknown (0 ms)
+[ RUN      ] MsmAllocator.FreeRemovesEntry
+[       OK ] MsmAllocator.FreeRemovesEntry (0 ms)
+[ RUN      ] MsmAllocator.FreeUnknownDoesNotCrash
+[       OK ] MsmAllocator.FreeUnknownDoesNotCrash (0 ms)
+[ RUN      ] MsmAllocator.AllocNullNameReturnsNull
+[       OK ] MsmAllocator.AllocNullNameReturnsNull (0 ms)
+[ RUN      ] MsmAllocator.AllocZeroSizeReturnsNull
+[       OK ] MsmAllocator.AllocZeroSizeReturnsNull (0 ms)
+[ RUN      ] MsmAllocator.GetNullNameReturnsNull
+[       OK ] MsmAllocator.GetNullNameReturnsNull (0 ms)
+[ RUN      ] MsmAllocator.WriteAndReadBack
+[       OK ] MsmAllocator.WriteAndReadBack (0 ms)
+[ RUN      ] MsmAllocator.MultipleAllocationsIndependent
+[       OK ] MsmAllocator.MultipleAllocationsIndependent (0 ms)
+[ RUN      ] MsmAllocator.FreeOneDoesNotInvalidateOther
+[       OK ] MsmAllocator.FreeOneDoesNotInvalidateOther (0 ms)
+[ RUN      ] MsmAllocator.DestructorCalledOnFree
+[       OK ] MsmAllocator.DestructorCalledOnFree (0 ms)
+[ RUN      ] MsmAllocator.NullDestructorNoIssue
+[       OK ] MsmAllocator.NullDestructorNoIssue (0 ms)
+[----------] 14 tests from MsmAllocator (5 ms total)
+
+[----------] 6 tests from MsmTypes
+[ RUN      ] MsmTypes.Int32WriteRead
+[       OK ] MsmTypes.Int32WriteRead (0 ms)
+[ RUN      ] MsmTypes.Float32WriteRead
+[       OK ] MsmTypes.Float32WriteRead (0 ms)
+[ RUN      ] MsmTypes.BooleanWriteRead
+[       OK ] MsmTypes.BooleanWriteRead (0 ms)
+[ RUN      ] MsmTypes.Int64WriteRead
+[       OK ] MsmTypes.Int64WriteRead (0 ms)
+[ RUN      ] MsmTypes.Float64WriteRead
+[       OK ] MsmTypes.Float64WriteRead (0 ms)
+[ RUN      ] MsmTypes.SlotSizes
+[       OK ] MsmTypes.SlotSizes (0 ms)
+[----------] 6 tests from MsmTypes (1 ms total)
+
+[----------] 7 tests from MsmRecord
+[ RUN      ] MsmRecord.SlotSize
+[       OK ] MsmRecord.SlotSize (0 ms)
+[ RUN      ] MsmRecord.WriteAndReadFields
+[       OK ] MsmRecord.WriteAndReadFields (0 ms)
+[ RUN      ] MsmRecord.FieldsDoNotOverlap
+[       OK ] MsmRecord.FieldsDoNotOverlap (0 ms)
+[ RUN      ] MsmRecord.NestedRecord
+[       OK ] MsmRecord.NestedRecord (0 ms)
+[ RUN      ] MsmRecord.FieldCount
+[       OK ] MsmRecord.FieldCount (0 ms)
+[ RUN      ] MsmRecord.MemoryLayoutVerification
+[       OK ] MsmRecord.MemoryLayoutVerification (0 ms)
+[ RUN      ] MsmRecord.SegmentMemoryLayout
+[       OK ] MsmRecord.SegmentMemoryLayout (0 ms)
+[----------] 7 tests from MsmRecord (2 ms total)
+
+[----------] 9 tests from MsmArray
+[ RUN      ] MsmArray.SlotSize
+[       OK ] MsmArray.SlotSize (0 ms)
+[ RUN      ] MsmArray.InitiallyEmpty
+[       OK ] MsmArray.InitiallyEmpty (0 ms)
+[ RUN      ] MsmArray.PushBackPrimitive
+[       OK ] MsmArray.PushBackPrimitive (0 ms)
+[ RUN      ] MsmArray.Reserve
+[       OK ] MsmArray.Reserve (0 ms)
+[ RUN      ] MsmArray.GrowsAutomatically
+[       OK ] MsmArray.GrowsAutomatically (0 ms)
+[ RUN      ] MsmArray.Iterator
+[       OK ] MsmArray.Iterator (0 ms)
+[ RUN      ] MsmArray.EmplaceBackRecord
+[       OK ] MsmArray.EmplaceBackRecord (0 ms)
+[ RUN      ] MsmArray.EmplaceBackNoArgs
+[       OK ] MsmArray.EmplaceBackNoArgs (0 ms)
+[ RUN      ] MsmArray.Clear
+[       OK ] MsmArray.Clear (0 ms)
+[----------] 9 tests from MsmArray (3 ms total)
+
+[----------] 5 tests from MsmSegment
+[ RUN      ] MsmSegment.CreateAndOpen
+[       OK ] MsmSegment.CreateAndOpen (0 ms)
+[ RUN      ] MsmSegment.OpenNonexistentThrows
+[       OK ] MsmSegment.OpenNonexistentThrows (0 ms)
+[ RUN      ] MsmSegment.CloseFreesMemory
+[       OK ] MsmSegment.CloseFreesMemory (0 ms)
+[ RUN      ] MsmSegment.GetBase
+[       OK ] MsmSegment.GetBase (0 ms)
+[ RUN      ] MsmSegment.CloseAutoDestroysArrayData
+[       OK ] MsmSegment.CloseAutoDestroysArrayData (0 ms)
+[----------] 5 tests from MsmSegment (2 ms total)
+
+[----------] 6 tests from MsmDirect
+[ RUN      ] MsmDirect.Int32Segment
+[       OK ] MsmDirect.Int32Segment (0 ms)
+[ RUN      ] MsmDirect.Float64Segment
+[       OK ] MsmDirect.Float64Segment (0 ms)
+[ RUN      ] MsmDirect.BooleanSegment
+[       OK ] MsmDirect.BooleanSegment (0 ms)
+[ RUN      ] MsmDirect.ArrayInt32Segment
+[       OK ] MsmDirect.ArrayInt32Segment (0 ms)
+[ RUN      ] MsmDirect.ArrayFloat64Segment
+[       OK ] MsmDirect.ArrayFloat64Segment (0 ms)
+[ RUN      ] MsmDirect.ArrayGrowAndIterate
+[       OK ] MsmDirect.ArrayGrowAndIterate (0 ms)
+[----------] 6 tests from MsmDirect (3 ms total)
+
+[----------] 15 tests from MsmCoverage
+[ RUN      ] MsmCoverage.Float32Segment
+[       OK ] MsmCoverage.Float32Segment (0 ms)
+[ RUN      ] MsmCoverage.Int64Segment
+[       OK ] MsmCoverage.Int64Segment (0 ms)
+[ RUN      ] MsmCoverage.ArrayFloat32
+[       OK ] MsmCoverage.ArrayFloat32 (0 ms)
+[ RUN      ] MsmCoverage.ArrayInt64
+[       OK ] MsmCoverage.ArrayInt64 (0 ms)
+[ RUN      ] MsmCoverage.ArrayBoolean
+[       OK ] MsmCoverage.ArrayBoolean (0 ms)
+[ RUN      ] MsmCoverage.NestedRecord
+[       OK ] MsmCoverage.NestedRecord (0 ms)
+[ RUN      ] MsmCoverage.ArrayOfRecords
+[       OK ] MsmCoverage.ArrayOfRecords (0 ms)
+[ RUN      ] MsmCoverage.RecordAllPrimitiveTypes
+[       OK ] MsmCoverage.RecordAllPrimitiveTypes (0 ms)
+[ RUN      ] MsmCoverage.RecordWithArrayField
+[       OK ] MsmCoverage.RecordWithArrayField (0 ms)
+[ RUN      ] MsmCoverage.ArrayClearAndReuse
+[       OK ] MsmCoverage.ArrayClearAndReuse (0 ms)
+[ RUN      ] MsmCoverage.ArrayReserveCapacity
+[       OK ] MsmCoverage.ArrayReserveCapacity (0 ms)
+[ RUN      ] MsmCoverage.ArrayEmplaceBackWithArgs
+[       OK ] MsmCoverage.ArrayEmplaceBackWithArgs (0 ms)
+[ RUN      ] MsmCoverage.StringSegment
+[       OK ] MsmCoverage.StringSegment (0 ms)
+[ RUN      ] MsmCoverage.StringInRecord
+[       OK ] MsmCoverage.StringInRecord (0 ms)
+[ RUN      ] MsmCoverage.StringReassign
+[       OK ] MsmCoverage.StringReassign (0 ms)
+[----------] 15 tests from MsmCoverage (5 ms total)
+
+[----------] 5 tests from MsmConcurrent
+[ RUN      ] MsmConcurrent.ArrayPushBackNoTornRead
+[       OK ] MsmConcurrent.ArrayPushBackNoTornRead (11 ms)
+[ RUN      ] MsmConcurrent.StringGrowNoTornRead
+[       OK ] MsmConcurrent.StringGrowNoTornRead (296 ms)
+[ RUN      ] MsmConcurrent.StringShrinkGrowNoTornRead
+[       OK ] MsmConcurrent.StringShrinkGrowNoTornRead (25 ms)
+[ RUN      ] MsmConcurrent.ObjectAddRemoveNoTornRead
+[       OK ] MsmConcurrent.ObjectAddRemoveNoTornRead (2547 ms)
+[ RUN      ] MsmConcurrent.ObjectMarkerRemoveNoStaleReads
+[       OK ] MsmConcurrent.ObjectMarkerRemoveNoStaleReads (57 ms)
+[----------] 5 tests from MsmConcurrent (2942 ms total)
+
+[----------] 4 tests from MsmMemoryOverhead
+[ RUN      ] MsmMemoryOverhead.AppendOnlyGrow_Under_5MB
+/mnt/c/Users/vahag/workdir/projects/post-graduate/source/cpp-abi-extension/tests/msm/test_memory_overhead.cpp:90: Skipped
+skipped under sanitizer (RSS dominated by shadow memory)
+
+[  SKIPPED ] MsmMemoryOverhead.AppendOnlyGrow_Under_5MB (0 ms)
+[ RUN      ] MsmMemoryOverhead.StringGrowAlwaysCoW_Under_5MB
+/mnt/c/Users/vahag/workdir/projects/post-graduate/source/cpp-abi-extension/tests/msm/test_memory_overhead.cpp:129: Skipped
+skipped under sanitizer (RSS dominated by shadow memory)
+
+[  SKIPPED ] MsmMemoryOverhead.StringGrowAlwaysCoW_Under_5MB (0 ms)
+[ RUN      ] MsmMemoryOverhead.ObjectAddRemove_Under_50MB
+/mnt/c/Users/vahag/workdir/projects/post-graduate/source/cpp-abi-extension/tests/msm/test_memory_overhead.cpp:173: Skipped
+skipped under sanitizer (RSS dominated by shadow memory)
+
+[  SKIPPED ] MsmMemoryOverhead.ObjectAddRemove_Under_50MB (0 ms)
+[ RUN      ] MsmMemoryOverhead.FreeReleasesAllMemory
+/mnt/c/Users/vahag/workdir/projects/post-graduate/source/cpp-abi-extension/tests/msm/test_memory_overhead.cpp:213: Skipped
+skipped under sanitizer (RSS dominated by shadow memory)
+
+[  SKIPPED ] MsmMemoryOverhead.FreeReleasesAllMemory (0 ms)
+[----------] 4 tests from MsmMemoryOverhead (2 ms total)
+
+[----------] 7 tests from MsmSchemaHash
+[ RUN      ] MsmSchemaHash.Fnv1aIsDeterministic
+[       OK ] MsmSchemaHash.Fnv1aIsDeterministic (0 ms)
+[ RUN      ] MsmSchemaHash.Fnv1aIsSensitiveToContent
+[       OK ] MsmSchemaHash.Fnv1aIsSensitiveToContent (0 ms)
+[ RUN      ] MsmSchemaHash.Fnv1aEmptyAndNull
+[       OK ] MsmSchemaHash.Fnv1aEmptyAndNull (0 ms)
+[ RUN      ] MsmSchemaHash.AllocWithSchemaAndGetMatching
+[       OK ] MsmSchemaHash.AllocWithSchemaAndGetMatching (0 ms)
+[ RUN      ] MsmSchemaHash.GetSchemaHashUnknownReturnsZero
+[       OK ] MsmSchemaHash.GetSchemaHashUnknownReturnsZero (0 ms)
+[ RUN      ] MsmSchemaHash.LegacyAllocHasZeroSchema
+[       OK ] MsmSchemaHash.LegacyAllocHasZeroSchema (0 ms)
+[ RUN      ] MsmSchemaHash.GetWithSchemaNotFoundReturnsNull
+[       OK ] MsmSchemaHash.GetWithSchemaNotFoundReturnsNull (0 ms)
+[----------] 7 tests from MsmSchemaHash (2 ms total)
+
+[----------] Global test environment tear-down
+[==========] 79 tests from 11 test suites ran. (3224 ms total)
+[  PASSED  ] 75 tests.
+[  SKIPPED ] 4 tests, listed below:
+[  SKIPPED ] MsmMemoryOverhead.AppendOnlyGrow_Under_5MB
+[  SKIPPED ] MsmMemoryOverhead.StringGrowAlwaysCoW_Under_5MB
+[  SKIPPED ] MsmMemoryOverhead.ObjectAddRemove_Under_50MB
+[  SKIPPED ] MsmMemoryOverhead.FreeReleasesAllMemory
