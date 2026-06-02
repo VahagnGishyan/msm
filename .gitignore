@@ -1,0 +1,7 @@
+*.o
+*.so
+*.obj
+*.bin
+bin/msm-concurrency-bench
+/build/
+bin/run-all-tests

@@ -62,7 +62,7 @@ Binaries land in `bin/`:
 - `run-all-tests` — the full Google Test suite
 - `msm-concurrency-bench` — the benchmark used in §3.2–§3.4
 
-### Debug + ThreadSanitizer (used for the 79/79 + 0-races claim)
+### Debug + ThreadSanitizer (used for the race-freedom validation)
 
 ```bash
 cmake -B build/tsan -DCMAKE_BUILD_TYPE=Debug -DENABLE_TSAN=ON
@@ -130,7 +130,7 @@ not a bug).
 ### Scalability sweep (paper Fig. 3 / Table referenced in §3.2)
 
 ```bash
-./bin/msm-concurrency-bench --section 2
+./bin/msm-concurrency-bench scalability
 ```
 
 Reports reads/s for 1, 2, 4, 8, 16 readers + 1 writer on a shared `int32` field
@@ -139,7 +139,7 @@ inside an `msm_object`. Paper numbers: 154 → 222 → 389 → 589 → 785 M rea
 ### Comparison vs std::atomic / std::mutex / std::shared_mutex / pthread_rwlock_t
 
 ```bash
-./bin/msm-concurrency-bench --section 3
+./bin/msm-concurrency-bench comparison
 ```
 
 Same workload through five different synchronization primitives at 16 readers.
@@ -149,7 +149,7 @@ Paper numbers (M reads/s): `std::atomic 8246`, **MSM 915**, `std::mutex 51`,
 ### Single-thread latency CDF (paper Table 2)
 
 ```bash
-./bin/msm-concurrency-bench --section 1
+./bin/msm-concurrency-bench latency
 ```
 
 Reports min / p50 / p90 / p95 / p99 / p99.9 / max for every basic operation.
@@ -163,10 +163,10 @@ Full reference run is in `results/benchmark-release.log`.
 | Paper artifact | Command | Reference log |
 |----------------|---------|---------------|
 | Table 1 — TSAN-clean stress tests | `ctest --test-dir build/tsan` | `results/tsan-clean.log` |
-| Table 2 — single-threaded latency | `./bin/msm-concurrency-bench --section 1` | `results/benchmark-release.log` |
-| Table 3 — comparison vs locks/atomic | `./bin/msm-concurrency-bench --section 3` | `results/benchmark-release.log` |
+| Table 2 — single-threaded latency | `./bin/msm-concurrency-bench latency` | `results/benchmark-release.log` |
+| Table 3 — comparison vs locks/atomic | `./bin/msm-concurrency-bench comparison` | `results/benchmark-release.log` |
 | Table 4 — RSS overhead | `./bin/run-all-tests --gtest_filter='*MemoryOverhead*'` | `results/memory-overhead.log` |
-| Fig. 3 — scalability 1+N readers | `./bin/msm-concurrency-bench --section 2` | `results/benchmark-release.log` |
+| Fig. 3 — scalability 1+N readers | `./bin/msm-concurrency-bench scalability` | `results/benchmark-release.log` |
 | Valgrind "0 still reachable" | `valgrind ./bin/run-all-tests` | `results/valgrind-leak.log` |
 
 ---

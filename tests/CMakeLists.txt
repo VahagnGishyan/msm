@@ -5,11 +5,14 @@ find_package(GTest REQUIRED)
 include(GoogleTest)
 
 # Single executable that runs every test cited in the paper.
+#
+# test_array_ops.cpp is left out: it is a cross-language integration test that
+# links against the separate array-ops library, which is not part of this
+# standalone tree. Add it back once that library is available here.
 add_executable(run-all-tests
     test_types.cpp
     test_record.cpp
     test_array.cpp
-    test_array_ops.cpp
     test_segment.cpp
     test_direct_types.cpp
     test_all_types_coverage.cpp

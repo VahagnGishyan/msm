@@ -1,22 +1,23 @@
-// MSM Concurrency Benchmark
+// MSM concurrency benchmark.
 //
-// PLAN.md §3.7.1 (Latency CDF) + §3.7.2 (Scalability curve).
-//
-// Two sections:
-//   1. Latency CDF — single-threaded, 100K-1M iterations per op, compute
-//      p50/p90/p95/p99/p99.9 (sorted-samples method).
-//   2. Scalability — 1 writer + N readers (N=1, 2, 4, 8, 16), measure
+// Three sections:
+//   1. Latency CDF — single-threaded, 100K iterations per op; reports
+//      p50/p90/p95/p99/p99.9 from sorted samples.
+//   2. Scalability — 1 writer + N readers (N = 1, 2, 4, 8, 16); reports
 //      aggregate read throughput (ops/sec).
+//   3. Comparison — the same workload over std::mutex, std::shared_mutex,
+//      pthread_rwlock, and std::atomic for reference.
 //
-// Output: CSV to stdout, suitable for plotting / paper Evaluation table.
+// Output is CSV on stdout, suitable for plotting or tabulation.
 //
-// Build: cmake target msm-concurrency-bench (Release recommended for clean
-// numbers; under Debug-TSAN values are dominated by instrumentation cost).
+// Build the cmake target msm-concurrency-bench (Release is recommended for
+// clean numbers; under Debug+TSAN the values are dominated by instrumentation).
 //
 // Usage:
-//   ./msm-concurrency-bench                       # default: all benchmarks
-//   ./msm-concurrency-bench latency               # only latency CDF
-//   ./msm-concurrency-bench scalability           # only scalability curve
+//   ./msm-concurrency-bench                # all sections (default)
+//   ./msm-concurrency-bench latency        # latency CDF only
+//   ./msm-concurrency-bench scalability    # scalability curve only
+//   ./msm-concurrency-bench comparison     # primitive comparison only
 
 #include "msm_allocator.h"
 
@@ -39,7 +40,7 @@ using clk = std::chrono::steady_clock;
 namespace
 {
 
-// --- Percentile helper (sorted samples) -------------------------------------
+// --- Percentile helper (sorted samples) ---
 double percentile(std::vector<double>& samples, double p)
 {
     if (samples.empty()) return 0.0;
@@ -52,7 +53,7 @@ double percentile(std::vector<double>& samples, double p)
     return samples[lo] * (1.0 - frac) + samples[hi] * frac;
 }
 
-// --- Latency measurement: single op repeated N times, sample per op ---------
+// --- Latency measurement: single op repeated N times, sampled per op ---
 template<typename OpFn>
 void measure_latency(const char* op_name, OpFn op, std::size_t iterations)
 {
@@ -86,9 +87,7 @@ void measure_latency(const char* op_name, OpFn op, std::size_t iterations)
                 op_name, iterations, min_v, p50, p90, p95, p99, p999, max_v);
 }
 
-// =============================================================================
-// Section 1: Latency CDF
-// =============================================================================
+// Section 1: Latency CDF.
 void run_latency_benchmarks()
 {
     std::printf("# Section 1: Latency CDF (single-threaded, time per op, nanoseconds)\n");
@@ -134,7 +133,7 @@ void run_latency_benchmarks()
         msm_free("bench_array_read");
     }
 
-    // --- String set (always CoW under Variant B) ---
+    // --- String set (always copies) ---
     {
         auto* slot = msm_alloc("bench_string_set", 24, nullptr);
         std::memset(slot, 0, 24);
@@ -249,18 +248,12 @@ void run_latency_benchmarks()
     }
 }
 
-// =============================================================================
-// Section 2: Scalability curve
+// Section 2: Scalability curve.
 //
-// One writer thread continuously updates an int32 in shared memory;
-// N reader threads continuously read the same value. Measure aggregate read
-// throughput (ops/sec) across all readers.
-//
-// Pattern: writer publishes seq number monotonically; readers verify
-// seq >= last_seen_seq (loose check, just to make read non-trivial).
-//
-// This isolates lock-free SWMR scaling characteristics.
-// =============================================================================
+// One writer thread continuously updates an int32 in shared memory while N
+// reader threads continuously read it; we report aggregate read throughput
+// (ops/sec) across all readers. This isolates the lock-free SWMR scaling
+// characteristics.
 void run_scalability_benchmark()
 {
     std::printf("# Section 2: Scalability — 1 writer + N readers, aggregate reads/sec\n");
@@ -320,17 +313,13 @@ void run_scalability_benchmark()
     }
 }
 
-// =============================================================================
-// Section 3: Comparison — MSM lock-free vs std::mutex vs std::shared_mutex
-//   vs pthread_rwlock.
+// Section 3: Comparison — lock-free MSM vs std::mutex, std::shared_mutex,
+// pthread_rwlock, and std::atomic.
 //
-// Same workload as Section 2 (1 writer + N readers, int update + read), but
-// implemented over plain int with various synchronization primitives.
-// Output: ops/sec per primitive, per reader-count.
-//
-// This directly contrasts MSM's lock-free SWMR approach against widely-used
-// blocking alternatives.
-// =============================================================================
+// Same workload as Section 2 (1 writer + N readers, int update + read) but
+// implemented over a plain int with various synchronization primitives, so the
+// lock-free path can be contrasted against the common blocking alternatives.
+// Output is ops/sec per primitive, per reader count.
 
 template<typename Locked>
 double run_locked_scalability(int n_readers, int duration_s, Locked& locked)

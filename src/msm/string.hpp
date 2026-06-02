@@ -4,11 +4,8 @@
 #include <cstdint>
 #include <cstring>
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// C API declarations (implemented in msm-allocator DLL).
-// Single source of truth for string operations.
-// Both msm::string (C++) and MsmString (C#) delegate to these.
-// ═══════════════════════════════════════════════════════════════════════════════
+// C API declarations (implemented in the msm-allocator library). Both
+// msm::string here and the C# MsmString binding delegate to these.
 
 extern "C"
 {
@@ -20,28 +17,20 @@ extern "C"
 
 namespace msm
 {
-    //////////////////////////////////////////////////////////////////////
-    /// string — UTF-8 string stored in shared memory, delegates to C API.
+    /// string — a UTF-8 string in shared memory that delegates to the
+    /// msm_string_* C API, so C++ and the other bindings share one path.
     ///
-    /// Slot layout (16 bytes, stored inline in parent record):
-    ///   [header: 8B] [data_ptr: 8B]
-    ///
-    /// Variant B (since 2026-05-26): length and capacity are stored INSIDE
-    /// the buffer pointed to by data_ptr, not in the slot. Buffer layout:
-    ///   [len: 4B | cap: 4B | data: cap bytes (null-terminated)]
-    ///
-    /// All mutation (set, clear) goes through msm_string_* C API in
-    /// msm-allocator DLL — single implementation shared by all language
-    /// bindings (C++, C#, etc.). The 8 bytes formerly used for len+cap in
-    /// the slot are now reclaimed (reduced slot from 24 to 16 bytes).
-    //////////////////////////////////////////////////////////////////////
+    /// The slot, stored inline in the parent record, is 16 bytes:
+    ///   slot:   [header:8 | data_ptr:8]
+    /// Length and capacity live in the buffer, not the slot:
+    ///   buffer: [len:4 | cap:4 | data: cap bytes, null-terminated]
 
     struct string
     {
         using native_type = string;
-        static constexpr std::size_t slot_size = 16; // header(8) + data_ptr(8). len+cap moved to buffer header.
+        static constexpr std::size_t slot_size = 16; // header(8) + data_ptr(8); len and cap live in the buffer
 
-        std::int8_t* ptr_; // points to the 24-byte slot in parent record/segment
+        std::int8_t* ptr_; // points to the 16-byte slot in the parent record/segment
 
         /// Deallocate the data buffer (called by allocator on msm_free).
         static void deallocate(std::int8_t* slot)

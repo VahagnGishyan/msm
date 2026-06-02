@@ -30,25 +30,21 @@ EXPORT std::int8_t* PROJECT_SHARED_CCA msm_get(const char* name);
 /// Thread-safe. noexcept.
 EXPORT void PROJECT_SHARED_CCA msm_free(const char* name);
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// Schema hash — contract C2 enforcement (silent cross-language corruption guard).
+// Schema hash — contract C2: a guard against silent cross-language corruption.
 //
-// Two parties (e.g., C++ writer and C# reader) attaching to a named segment
-// MUST agree on the byte layout of stored data. The schema_hash is a writer-
-// declared 64-bit fingerprint of the agreed schema (FNV-1a is provided as a
-// helper but any 64-bit hash works as long as both sides compute identically).
+// Two parties attaching to the same named segment (say a C++ writer and a C#
+// reader) must agree on the byte layout of what's stored. schema_hash is the
+// writer's 64-bit fingerprint of that agreed layout. FNV-1a is provided as a
+// helper, but any 64-bit hash works as long as both sides compute it the same.
 //
-// Usage:
 //   uint64_t h = msm_schema_hash_fnv1a("Graph{nodes:int32, edges:array<Edge>}");
 //   ptr = msm_alloc_with_schema("graph", size, h, dtor);
-//   // later (possibly different process / language):
-//   ptr = msm_get_with_schema("graph", h);  // aborts if hash mismatch
+//   // later, possibly in another process or language:
+//   ptr = msm_get_with_schema("graph", h);  // aborts on mismatch
 //
-// Mismatch handling: msm_get_with_schema calls std::abort() with a fprintf
-// diagnostic showing both hashes. This is a fail-fast contract violation
-// detection, NOT recoverable error handling — silent layout drift is the
-// single most dangerous failure mode for cross-language shared memory.
-// ═══════════════════════════════════════════════════════════════════════════════
+// On mismatch msm_get_with_schema prints both hashes and calls std::abort():
+// fail-fast contract enforcement, not recoverable error handling. Silent
+// layout drift is the worst failure mode for shared memory.
 
 /// FNV-1a 64-bit hash of a null-terminated string. Recommended helper for
 /// computing schema_hash arguments, but any 64-bit hash works as long as
@@ -73,11 +69,10 @@ EXPORT std::int8_t* PROJECT_SHARED_CCA msm_get_with_schema(const char* name, std
 /// or no schema was attached. For inspection / debugging.
 EXPORT std::uint64_t PROJECT_SHARED_CCA msm_get_schema_hash(const char* name);
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// Array C API — operates on a 24-byte array slot: [header:8][data_ptr:8][size:4][capacity:4]
-// item_size = size of each element in bytes (e.g., 8 for int32, 16 for float64)
-// These functions implement the same logic as msm::array<T> in C++ but via C ABI.
-// ═══════════════════════════════════════════════════════════════════════════════
+// Array C API. The slot is 16 bytes — [header:8 | data_ptr:8]; size and
+// capacity live in the heap buffer's header (see msm_allocator.cpp for the
+// layout and memory ordering). item_size is the size of one element in bytes.
+// Same semantics as msm::array<T>, exposed over the C ABI.
 
 /// Get current element count.
 EXPORT std::uint32_t PROJECT_SHARED_CCA msm_array_size(std::int8_t* slot);
@@ -104,16 +99,15 @@ EXPORT std::int8_t* PROJECT_SHARED_CCA msm_array_prepare_push(std::int8_t* slot,
 /// Must be called after msm_array_prepare_push once the slot has been filled.
 EXPORT void PROJECT_SHARED_CCA msm_array_commit_push(std::int8_t* slot);
 
-/// Get pointer to element at index. No bounds checking.
+/// Get pointer to element at index, or nullptr if index is out of range.
 EXPORT std::int8_t* PROJECT_SHARED_CCA msm_array_get(std::int8_t* slot, std::uint32_t index, std::uint32_t item_size);
 
 /// Clear: set size to 0 (does not free memory).
 EXPORT void PROJECT_SHARED_CCA msm_array_clear(std::int8_t* slot);
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// String C API — operates on a 24-byte string slot: [header:8][data_ptr:8][length:4][capacity:4]
-// UTF-8 encoded, null-terminated. Single implementation shared by C++/C#.
-// ═══════════════════════════════════════════════════════════════════════════════
+// String C API. The slot is [header:8 | data_ptr:8]; length and capacity live
+// in the buffer header. UTF-8, null-terminated. C++ (msm::string) and the C#
+// binding both delegate here.
 
 /// Set string value. Copies `len` bytes from `str` into the slot's data buffer.
 /// Allocates/grows buffer as needed. Null-terminates the stored data.
@@ -129,20 +123,17 @@ EXPORT std::uint32_t PROJECT_SHARED_CCA msm_string_length(std::int8_t* slot);
 /// Clear string: set length to 0 (does not free buffer).
 EXPORT void PROJECT_SHARED_CCA msm_string_clear(std::int8_t* slot);
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// Record C API — field access via pointer + offset.
-// Provides uniform C ABI for all language bindings.
-// ═══════════════════════════════════════════════════════════════════════════════
+// Record C API — field access via pointer + offset, giving every language
+// binding a uniform C ABI.
 
 /// Get pointer to a field within a record at the given byte offset.
 EXPORT std::int8_t* PROJECT_SHARED_CCA msm_record_get_field(std::int8_t* record_ptr, std::uint32_t offset);
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// Object C API — dynamic property bag with named fields.
-// Slot layout: [header:8][entries_ptr:8][count:4][capacity:4] = 24 bytes
-// Entry layout (24B each): [name_ptr:8][name_len:2][type_id:2][size:4][value_ptr:8]
-// Values are heap-allocated. Type is immutable once set (mismatch = abort).
-// ═══════════════════════════════════════════════════════════════════════════════
+// Object C API — a dynamic property bag with named fields. The slot is 16
+// bytes — [header:8 | entries_ptr:8]; count and capacity live in the buffer
+// header, and each 24-byte entry is [name_hash:8 | type_id:2 | unused:2 |
+// size:4 | value_ptr:8]. Fields are keyed by the FNV-1a hash of their name.
+// Values are heap-allocated; a field's type is fixed once set (mismatch aborts).
 
 /// Set int32 field. Creates or overwrites (same type only).
 EXPORT int PROJECT_SHARED_CCA msm_object_set_int32(std::int8_t* slot, const char* name, std::int32_t value);
@@ -189,18 +180,17 @@ EXPORT int PROJECT_SHARED_CCA msm_object_has_field(std::int8_t* slot, const char
 /// Get type_id of a field. Returns 0 if not found.
 EXPORT std::uint16_t PROJECT_SHARED_CCA msm_object_get_type(std::int8_t* slot, const char* name);
 
-/// Ensure a nested object field exists. Creates if not present (type=OBJECT, 24B value).
-/// Returns pointer to the nested object's 24-byte slot. Aborts on type mismatch.
+/// Ensure a nested object field exists, creating it (type OBJECT) if absent.
+/// Returns a pointer to the nested object's slot, which the other msm_object_*
+/// calls then operate on. Aborts on type mismatch.
 EXPORT std::int8_t* PROJECT_SHARED_CCA msm_object_ensure_object(std::int8_t* slot, const char* name);
 
 #ifdef __cplusplus
 }
 #endif
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// MSM Type IDs — used in object entries and slot headers.
-// C++ only (enum class). For C interop, cast to uint16_t.
-// ═══════════════════════════════════════════════════════════════════════════════
+// MSM type IDs — used in object entries and slot headers. C++ only (enum
+// class); for C interop, cast to uint16_t.
 
 enum class msm_type : std::uint16_t
 {

@@ -24,26 +24,19 @@ extern "C"
 
 namespace msm
 {
-    //////////////////////////////////////////////////////////////////////
-    /// array<ItemType> — dynamic array, delegates to C API.
+    /// array<ItemType> — a dynamic array that delegates to the msm_array_* C
+    /// API, so C++ and the other language bindings share one implementation.
     ///
-    /// Slot layout (16 bytes, stored inline in parent record):
-    ///   [header: 8B] [data_ptr: 8B]
-    ///
-    /// Variant B (since 2026-05-26): size and capacity are stored INSIDE
-    /// the data buffer header, not in the slot. Buffer layout:
-    ///   [size: 4B | cap: 4B | elements: size × item_size bytes]
-    ///
-    /// All mutation (reserve, push_back, clear) goes through msm_array_*
-    /// C API in msm-allocator DLL — single implementation shared by all
-    /// language bindings (C++, C#, etc.). Slot reduced from 24 to 16 bytes.
-    //////////////////////////////////////////////////////////////////////
+    /// The slot, stored inline in the parent record, is 16 bytes:
+    ///   slot:   [header:8 | data_ptr:8]
+    /// Size and capacity live in the heap buffer's header, not the slot:
+    ///   buffer: [size:4 | cap:4 | elements: size × item_size bytes]
 
     template<typename ItemType>
     struct array
     {
         using native_type = array<ItemType>;
-        static constexpr std::size_t slot_size = 16; // header(8) + data_ptr(8). size+cap moved to buffer header.
+        static constexpr std::size_t slot_size = 16; // header(8) + data_ptr(8); size and cap live in the buffer
         static constexpr std::uint32_t item_size = static_cast<std::uint32_t>(ItemType::slot_size);
 
         std::int8_t* ptr_; // points to the 16-byte slot in parent record
@@ -63,7 +56,6 @@ namespace msm
             if (!buf) return;
 
             // If items have nested allocations, deallocate each.
-            // Read size from buffer header (Variant B layout).
             if constexpr (requires { ItemType::deallocate(nullptr); })
             {
                 std::uint32_t sz;
@@ -168,8 +160,8 @@ namespace msm
             msm_array_clear(ptr_);
         }
 
-        /// Free data block (for manual cleanup without allocator).
-        /// Variant B: free the whole buffer (header + elements as single malloc).
+        /// Free the data block (manual cleanup without the allocator). Header
+        /// and elements were a single malloc, so one free releases everything.
         void destroy()
         {
             std::int8_t* buf;
@@ -180,8 +172,8 @@ namespace msm
                 std::int8_t* null_ptr = nullptr;
                 std::memcpy(ptr_ + 8, &null_ptr, sizeof(null_ptr));
             }
-            // No need to clear size/cap separately — they were inside buf,
-            // which is now freed. Slot+8 = nullptr ⇒ msm_array_size returns 0.
+            // size and cap lived inside buf, so freeing it is enough; slot+8
+            // is now null, which makes msm_array_size report 0.
         }
 
         // --- Iterator ---
@@ -201,7 +193,7 @@ namespace msm
 
         iterator begin() const
         {
-            // Variant B: ptr_+8 holds buffer ptr; elements start AFTER 8-byte buffer header.
+            // ptr_+8 holds the buffer pointer; elements start after its 8-byte header.
             std::int8_t* buf;
             std::memcpy(&buf, ptr_ + 8, sizeof(buf));
             return iterator{ buf ? buf + 8 : nullptr, 0 };

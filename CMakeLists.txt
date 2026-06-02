@@ -10,10 +10,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin")
 
-# ----------------------------------------------------------------------------
-# ThreadSanitizer (opt-in via -DENABLE_TSAN=ON). GCC/Clang only.
-# Must be applied globally — TSAN with partial instrumentation gives false negatives.
-# ----------------------------------------------------------------------------
+# ThreadSanitizer (opt-in via -DENABLE_TSAN=ON). GCC/Clang only. Must be applied
+# globally — partial instrumentation produces false negatives.
 option(ENABLE_TSAN "Build with ThreadSanitizer instrumentation" OFF)
 
 if (ENABLE_TSAN)

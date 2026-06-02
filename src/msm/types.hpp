@@ -5,18 +5,12 @@
 
 namespace msm
 {
-    //////////////////////////////////////////////////////////////////////
-    /// MSM type wrappers — thin views over raw shared memory bytes.
-    /// Each type knows its slot_size and provides operator= / operator T().
+    /// MSM type wrappers — thin typed views over raw shared-memory bytes. Each
+    /// knows its slot_size and exposes operator= / operator T().
     ///
-    /// Slot layout for primitives (8B):
-    ///   [is_const:1B | type:1B | reserved:2B | payload:4B]
-    ///   Value stored in payload (bytes 4..7)
-    ///
-    /// Slot layout for scalars (16B):
-    ///   [header:8B | value:8B]
-    ///   Value stored in bytes 8..15
-    //////////////////////////////////////////////////////////////////////
+    /// Primitive slot (8 bytes): [is_const:1 | type:1 | reserved:2 | payload:4],
+    /// value in payload (bytes 4..7). Scalar slot (16 bytes): [header:8 | value:8],
+    /// value in bytes 8..15.
 
     struct boolean
     {

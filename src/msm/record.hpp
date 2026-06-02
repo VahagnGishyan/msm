@@ -6,7 +6,7 @@
 #include "member.hpp"
 #include "types.hpp"
 
-// Record C API (implemented in msm-allocator DLL)
+// Record C API (implemented in the msm-allocator library)
 extern "C"
 {
     std::int8_t* msm_record_get_field(std::int8_t* record_ptr, std::uint32_t offset);

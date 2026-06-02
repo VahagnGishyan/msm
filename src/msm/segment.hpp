@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include <string>
 
-// Allocator C API (from msm-allocator DLL)
+// Allocator C API (from the msm-allocator library)
 extern "C"
 {
     typedef void (*msm_destructor_fn)(std::int8_t* ptr);
@@ -15,16 +15,10 @@ extern "C"
 
 namespace msm
 {
-    //////////////////////////////////////////////////////////////////////
-    /// segment — typed access to named memory regions via allocator.
-    ///
-    /// All memory is owned by the allocator DLL.
-    /// segment::create<T> allocates T::slot_size bytes through C API.
-    /// segment::open<T> retrieves existing pointer through C API.
-    /// segment::close frees through C API.
-    ///
-    /// Abstractions throw on failure. Allocator returns null.
-    //////////////////////////////////////////////////////////////////////
+    /// segment — typed access to named memory regions owned by the allocator.
+    /// create<T> allocates T::slot_size bytes, open<T> retrieves an existing
+    /// region, and close frees it. These wrappers throw on failure; the
+    /// underlying C API returns null instead.
 
     struct segment
     {

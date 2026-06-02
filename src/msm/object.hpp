@@ -4,11 +4,8 @@
 #include <cstdint>
 #include <cstring>
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// C API declarations (implemented in msm-allocator DLL).
-// Single source of truth for object operations.
-// Both msm::object (C++) and MsmObject (C#) delegate to these.
-// ═══════════════════════════════════════════════════════════════════════════════
+// C API declarations (implemented in the msm-allocator library). Both
+// msm::object here and the C# MsmObject binding delegate to these.
 
 extern "C"
 {
@@ -37,14 +34,13 @@ namespace msm
 {
     struct object;
 
-    //////////////////////////////////////////////////////////////////////
-    /// object_proxy — returned by operator[], enables JsonCpp-style syntax.
-    /// Lightweight (two pointers), lives on stack only.
+    /// object_proxy — returned by operator[] to give fields bracket syntax.
+    /// Just two pointers, stack-only.
     ///
-    /// Write: obj["hp"] = 100;        (calls msm_object_set_int32)
-    /// Read:  int hp = obj["hp"];     (calls msm_object_get_int32 via conversion)
-    /// Type mismatch on overwrite = abort (programmer error).
-    //////////////////////////////////////////////////////////////////////
+    ///   obj["hp"] = 100;        // write, via msm_object_set_int32
+    ///   int hp = obj["hp"];     // read, via msm_object_get_int32 conversion
+    ///
+    /// Overwriting with a different type aborts (a programmer error).
 
     struct object_proxy
     {
@@ -95,24 +91,17 @@ namespace msm
         }
     };
 
-    //////////////////////////////////////////////////////////////////////
-    /// object — dynamic property bag, delegates to C API.
+    /// object — a dynamic property bag that delegates to the msm_object_* C API.
     ///
-    /// Slot layout (16 bytes, stored inline in parent record/segment):
-    ///   [header: 8B] [entries_ptr: 8B]
-    ///
-    /// Variant B (since 2026-05-26): count and capacity are stored INSIDE
-    /// the entries buffer header, not in the slot. Buffer layout:
-    ///   [count: 4B | cap: 4B | entries: count × 24 bytes]
-    ///
-    /// All mutation goes through msm_object_* C API in msm-allocator DLL.
-    /// Slot reduced from 24 to 16 bytes.
-    //////////////////////////////////////////////////////////////////////
+    /// The slot, stored inline in the parent record/segment, is 16 bytes:
+    ///   slot:   [header:8 | entries_ptr:8]
+    /// Count and capacity live in the entries buffer's header, not the slot:
+    ///   buffer: [count:4 | cap:4 | entries: count × 24 bytes]
 
     struct object
     {
         using native_type = object;
-        static constexpr std::size_t slot_size = 16; // header(8) + entries_ptr(8). count+cap moved to buffer header.
+        static constexpr std::size_t slot_size = 16; // header(8) + entries_ptr(8); count and cap live in the buffer
 
         std::int8_t* ptr_;
 
@@ -129,26 +118,25 @@ namespace msm
             std::memcpy(&buf, slot + 8, sizeof(buf));
             if (!buf) return;
 
-            // Read count from buffer header (Variant B layout)
             std::uint32_t count;
             std::memcpy(&count, buf, 4);
 
-            // Entries start AFTER the 8-byte buffer header [count:4 | cap:4]
+            // Entries start after the 8-byte buffer header [count:4 | cap:4].
             std::int8_t* entries = buf + 8;
 
             for (std::uint32_t i = 0; i < count; ++i)
             {
                 std::int8_t* e = entries + i * 24;
 
-                // Post hash-names (REMARKS #3): no name buffer to free.
-                // Entry layout: [name_hash:8 | type_id:2 | unused:2 | size:4 | value_ptr:8]
+                // Entry: [name_hash:8 | type_id:2 | unused:2 | size:4 | value_ptr:8].
+                // The name is an inline hash, so only the value needs freeing.
                 std::uint16_t type;
-                std::memcpy(&type, e + 8, 2);  // type_id offset changed from +10 to +8
+                std::memcpy(&type, e + 8, 2);
                 std::int8_t* val;
                 std::memcpy(&val, e + 16, 8);
                 if (val)
                 {
-                    // If string, free its internal buffer (Variant B buffer too)
+                    // A string value owns a separate data buffer; free it first.
                     if (type == 0x06) // msm_type::string
                     {
                         std::int8_t* str_data;
@@ -167,7 +155,7 @@ namespace msm
             std::memcpy(slot + 8, &null_ptr, sizeof(null_ptr));
         }
 
-        // --- operator[] — JsonCpp style ---
+        // --- operator[] — bracket access ---
 
         object_proxy operator[](const char* name)
         {
